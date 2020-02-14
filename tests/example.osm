@@ -1,0 +1,206 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<osm version='0.6' generator='JOSM'>
+  <node id='104877' version='1' visible='true' lat='53.80168365527' lon='21.56256793857' />
+  <node id='104880' version='1' visible='true' lat='53.8015062397' lon='21.56298636317' />
+  <node id='104884' version='1' visible='true' lat='53.80135416862' lon='21.56343697429' />
+  <node id='104886' version='1' visible='true' lat='53.80114506997' lon='21.56408070445' />
+  <node id='104888' version='1' visible='true' lat='53.80110071558' lon='21.56443475604' />
+  <node id='104890' version='1' visible='true' lat='53.80111338827' lon='21.56489609599' />
+  <node id='104892' version='1' visible='true' lat='53.80119576065' lon='21.56588314891' />
+  <node id='104894' version='1' visible='true' lat='53.80127813287' lon='21.56694530368' />
+  <node id='104896' version='1' visible='true' lat='53.801341496' lon='21.56740664363' />
+  <node id='104898' version='1' visible='true' lat='53.80148723085' lon='21.56790017009' />
+  <node id='104900' version='1' visible='true' lat='53.80162662892' lon='21.56825422168' />
+  <node id='104902' version='1' visible='true' lat='53.80236162929' lon='21.56997083545' />
+  <node id='104906' version='1' visible='true' lat='53.80272278854' lon='21.57082914233' />
+  <node id='108213' version='1' visible='true' lat='53.80143156682' lon='21.56320763114' />
+  <node id='108215' version='1' visible='true' lat='53.80128446601' lon='21.56306683481' timestamp='2020-02-14T13:01:15Z' user='Natsuyasumi' uid='1384396'>
+    <tag k='highway' v='give_way' />
+    <tag k='check_meta' v='yes' />
+  </node>
+  <node id='108217' version='1' visible='true' lat='53.80106903067' lon='21.56296491086' />
+  <node id='108219' version='1' visible='true' lat='53.80078389396' lon='21.56298636854' />
+  <node id='108221' version='1' visible='true' lat='53.80025797005' lon='21.56302391946' />
+  <node id='108223' version='1' visible='true' lat='53.79973520782' lon='21.56314730108' />
+  <node id='108225' version='1' visible='true' lat='53.79917441927' lon='21.56326531827' />
+  <node id='108227' version='1' visible='true' lat='53.79876570425' lon='21.56338869989' />
+  <node id='108229' version='1' visible='true' lat='53.79848055187' lon='21.56350939929' />
+  <node id='108244' version='1' visible='true' lat='53.80116410211' lon='21.56550379033' />
+  <node id='108246' version='1' visible='true' lat='53.80101517167' lon='21.56558811128' />
+  <node id='108248' version='1' visible='true' lat='53.80083458507' lon='21.56578659475' />
+  <node id='108250' version='1' visible='true' lat='53.80062231563' lon='21.56600653589' />
+  <node id='108252' version='1' visible='true' lat='53.80003619293' lon='21.56663953722' />
+  <node id='108254' version='1' visible='true' lat='53.80020094176' lon='21.56703650415' />
+  <node id='108256' version='1' visible='true' lat='53.80038469931' lon='21.56740128458' />
+  <node id='108258' version='1' visible='true' lat='53.80053994212' lon='21.56764268339' />
+  <node id='108260' version='1' visible='true' lat='53.80073320279' lon='21.56785726011' />
+  <node id='108262' version='1' visible='true' lat='53.80087260337' lon='21.56814693868' />
+  <node id='108264' version='1' visible='true' lat='53.80101833984' lon='21.56859218538' />
+  <node id='108266' version='1' visible='true' lat='53.80112288961' lon='21.56890332162' />
+  <node id='108268' version='1' visible='true' lat='53.80122585504' lon='21.56899451673' />
+  <node id='108270' version='1' visible='true' lat='53.8013573336' lon='21.56818448961' />
+  <node id='108272' version='1' visible='true' lat='53.80139218327' lon='21.56781434476'>
+    <tag k='highway' v='give_way' />
+  </node>
+  <node id='108274' version='1' visible='true' lat='53.80142576945' lon='21.56769203281' />
+  <node id='108307' version='1' visible='true' lat='53.7982746057' lon='21.56360059708' />
+  <node id='108309' version='1' visible='true' lat='53.79813202809' lon='21.56366228789' />
+  <node id='108311' version='1' visible='true' lat='53.79795142908' lon='21.56365960568' />
+  <node id='108313' version='1' visible='true' lat='53.79848371866' lon='21.56382590264' />
+  <node id='108315' version='1' visible='true' lat='53.79847579773' lon='21.56417727202' />
+  <node id='108317' version='1' visible='true' lat='53.79842035121' lon='21.56461983651' />
+  <node id='108319' version='1' visible='true' lat='53.79874669257' lon='21.56486928195' />
+  <node id='108321' version='1' visible='true' lat='53.79937402283' lon='21.56534671247' />
+  <node id='108323' version='1' visible='true' lat='53.799646496' lon='21.56556665361' />
+  <node id='108325' version='1' visible='true' lat='53.79975738574' lon='21.56577050149' />
+  <node id='108327' version='1' visible='true' lat='53.79991263088' lon='21.56629085004' />
+  <node id='108342' version='1' visible='true' lat='53.79848170735' lon='21.56362488289' timestamp='2020-02-14T14:01:15+01:00' user='Natsuyasumi' uid='1384396'>
+    <tag k='highway' v='give_way' />
+    <tag k='check_meta' v='yes' />
+  </node>
+  <node id='108376' version='1' visible='true' lat='53.80112288803' lon='21.56963824958' />
+  <node id='108378' version='1' visible='true' lat='53.80093279735' lon='21.57096326083' />
+  <node id='108454' version='1' visible='true' lat='53.79958154458' lon='21.56528502434'>
+    <tag k='amenity' v='parking' />
+  </node>
+  <node id='108462' version='1' visible='true' lat='53.80063181867' lon='21.56580537289'>
+    <tag k='amenity' v='parking' />
+  </node>
+  <node id='108464' version='1' visible='true' lat='53.80076329909' lon='21.56775802106'>
+    <tag k='amenity' v='parking' />
+  </node>
+  <node id='108467' version='1' visible='true' lat='53.79933283804' lon='21.56594752192'>
+    <tag k='name' v='Hotel Mikołajki' />
+    <tag k='tourism' v='hotel' />
+  </node>
+  <node id='108476' version='1' visible='true' lat='53.80079339855' lon='21.56839906633'>
+    <tag k='name' v='Villa Lux' />
+    <tag k='tourism' v='hotel' />
+  </node>
+  <node id='108479' version='1' visible='true' lat='53.80041638156' lon='21.5663981384'>
+    <tag k='name' v='Zacisze' />
+    <tag k='tourism' v='hotel' />
+  </node>
+  <node id='108482' version='1' visible='true' lat='53.7974254744' lon='21.56405924678'>
+    <tag k='name' v='Ach! Mazury' />
+    <tag k='tourism' v='hotel' />
+  </node>
+  <node id='108485' version='1' visible='true' lat='53.80013124358' lon='21.56276105762'>
+    <tag k='tourism' v='hotel' />
+  </node>
+  <node id='108488' version='1' visible='true' lat='53.79798311792' lon='21.56252502322'>
+    <tag k='tourism' v='hotel' />
+  </node>
+  <node id='108490' version='1' visible='true' lat='53.79672207255' lon='21.56166671634' timestamp='1581685275' user='Natsuyasumi' uid='1384396'>
+    <tag k='name' v='Albatros' />
+    <tag k='tourism' v='hotel' />
+    <tag k='check_meta' v='yes' />
+  </node>
+  <way id='104881' version='1' visible='true'>
+    <nd ref='104877' />
+    <nd ref='104880' />
+    <nd ref='108213' />
+    <nd ref='104884' />
+    <nd ref='104886' />
+    <nd ref='104888' />
+    <nd ref='104890' />
+    <nd ref='108244' />
+    <nd ref='104892' />
+    <nd ref='104894' />
+    <nd ref='104896' />
+    <nd ref='108274' />
+    <nd ref='104898' />
+    <nd ref='104900' />
+    <tag k='highway' v='primary' />
+    <tag k='name' v='Mrągowska' />
+  </way>
+  <way id='104929' version='1' visible='true'>
+    <nd ref='104900' />
+    <nd ref='104902' />
+    <tag k='bridge' v='yes' />
+    <tag k='highway' v='primary' />
+    <tag k='name' v='Mrągowska' />
+  </way>
+  <way id='104936' version='1' visible='true'>
+    <nd ref='104902' />
+    <nd ref='104906' />
+    <tag k='highway' v='primary' />
+    <tag k='name' v='Mrągowska' />
+  </way>
+  <way id='108216' version='1' visible='true'>
+    <nd ref='108213' />
+    <nd ref='108215' />
+    <nd ref='108217' />
+    <nd ref='108219' />
+    <nd ref='108221' />
+    <nd ref='108223' />
+    <nd ref='108225' />
+    <nd ref='108227' />
+    <nd ref='108229' />
+    <nd ref='108307' />
+    <nd ref='108309' />
+    <nd ref='108311' />
+    <tag k='highway' v='secondary' />
+    <tag k='name' v='Warszawska' />
+  </way>
+  <way id='108247' version='1' visible='true'>
+    <nd ref='108252' />
+    <nd ref='108254' />
+    <nd ref='108256' />
+    <nd ref='108258' />
+    <nd ref='108260' />
+    <nd ref='108262' />
+    <nd ref='108264' />
+    <nd ref='108266' />
+    <nd ref='108268' />
+    <nd ref='108270' />
+    <nd ref='108272' />
+    <nd ref='108274' />
+    <tag k='highway' v='residential' />
+    <tag k='name' v='Okrężna' />
+    <tag k='oneway' v='yes' />
+  </way>
+  <way id='108314' version='1' visible='true'>
+    <nd ref='108229' />
+    <nd ref='108342' />
+    <nd ref='108313' />
+    <nd ref='108315' />
+    <nd ref='108317' />
+    <nd ref='108319' />
+    <nd ref='108321' />
+    <nd ref='108323' />
+    <nd ref='108325' />
+    <nd ref='108327' />
+    <nd ref='108252' />
+    <tag k='highway' v='residential' />
+    <tag k='name' v='Aleja Spacerowa' />
+  </way>
+  <way id='108352' version='1' visible='true'>
+    <nd ref='108244' />
+    <nd ref='108246' />
+    <nd ref='108248' />
+    <nd ref='108250' />
+    <nd ref='108252' />
+    <tag k='highway' v='residential' />
+    <tag k='name' v='Okrężna' />
+    <tag k='oneway' v='yes' />
+  </way>
+  <way id='108377' version='1' visible='true'>
+    <nd ref='108268' />
+    <nd ref='108376' />
+    <tag k='highway' v='pedestrian' />
+  </way>
+  <way id='108387' version='1' visible='true'>
+    <nd ref='108376' />
+    <nd ref='108378' />
+    <tag k='bridge' v='yes' />
+    <tag k='highway' v='pedestrian' />
+  </way>
+  <relation id='108208' version='1' visible='true'>
+    <member type='way' ref='104936' role='street' />
+    <member type='way' ref='104929' role='street' />
+    <member type='way' ref='104881' role='street' />
+    <tag k='name' v='Mrągowska' />
+    <tag k='type' v='street' />
+  </relation>
+</osm>
