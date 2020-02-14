@@ -7,7 +7,7 @@ import osmiter
 # python3 setup.py sdist
 # python3 -m twine upload dist/*filename*
 
-with open("readme.md", "r", encoding="utf-8") as f:
+with open("README.md", "r", encoding="utf-8") as f:
     readme = f.read()
 
 setup(
@@ -30,6 +30,6 @@ setup(
       "Topic :: Scientific/Engineering :: GIS",
       "Topic :: Software Development :: Libraries :: Python Modules",
   ],
-  packages=["osmiter"],
-  install_requires=["iso8601"],
+  packages=find_packages(),
+  install_requires=["iso8601", "protobuf"],
 )
