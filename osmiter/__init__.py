@@ -12,7 +12,7 @@ __url__ = "https://github.com/MKuranowski/osmiter"
 __author__ = "Mikołaj Kuranowski"
 __copyright__ = "Copyright 2020 Mikolaj Kuranowski"
 __license__ = "MIT"
-__version__ = "1.0.3"
+__version__ = "1.0.4"
 __email__ = "mkuranowski@gmail.com"
 
 def iter_from_osm(

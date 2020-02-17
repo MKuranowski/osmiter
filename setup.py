@@ -1,5 +1,4 @@
 from setuptools import setup, find_packages
-import osmiter
 
 # new release walkthrough:
 # python3 -m pytest
@@ -13,14 +12,14 @@ with open("README.md", "r", encoding="utf-8") as f:
 setup(
   name = "osmiter",
   py_modules = ["osmiter"],
-  license = osmiter.__license__,
-  version = osmiter.__version__,
-  description = osmiter.__description__,
+  license = "MIT",
+  version = "1.0.4",
+  description = "Library for reading OSM XML/GZ/BZ2/PBF files",
   long_description = readme,
   long_description_content_type = "text/markdown",
-  author = osmiter.__author__,
-  author_email = osmiter.__email__,
-  url = osmiter.__url__,
+  author = "Mikołaj Kuranowski",
+  author_email = "mkuranowski@gmail.com",
+  url = "https://github.com/MKuranowski/osmiter",
   keywords = "osm xml gz pz2 pbf openstreetmap parser",
   classifiers = [
       "Development Status :: 4 - Beta",
