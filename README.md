@@ -216,6 +216,10 @@ Yields all items inside a given OSM XML buffer.
 Same as `osmiter.iter_from_xml_buffer`.
 
 ---
+### osmiter.parser_xml.OSMError
+An exception (inheriting from `RuntimeException`) used to represent issues with XML data.
+
+---
 
 ### osmiter.iter_from_pbf_buffer
 ```
@@ -237,7 +241,7 @@ Internal object used to parse PBF files. Don't use.
 ---
 
 ### osmiter.parser_pbf.PBFError
-An Exception (inheriting from `RuntimeException`), used to represent issues with OSM PBF files.
+An Exception (inheriting from `RuntimeException`) used to represent issues with OSM PBF files.
 
 ---
 
