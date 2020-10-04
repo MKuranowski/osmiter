@@ -13,7 +13,9 @@ __author__ = "Mikołaj Kuranowski"
 __copyright__ = "Copyright 2020 Mikolaj Kuranowski"
 __license__ = "MIT"
 __version__ = "1.0.4"
-__email__ = "mkuranowski@gmail.com"
+__email__ = "".join(chr(i) for i in [109, 107, 117, 114, 97, 110, 111, 119, 115, 107, 105, 64,
+                                     103, 109, 97, 105, 108, 46, 99, 111, 109])
+
 
 def iter_from_osm(
         source: Union[str, bytes, int, BinaryIO],

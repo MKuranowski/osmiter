@@ -13,7 +13,7 @@ import os
 # THIS MEANS THAT PBF VALIDATION MAY FAIL ON VERIFYING METADATA
 
 true_rel_count = 1
-true_rel_mragowska = 3, "street", "way" # no of elements, roles
+true_rel_mragowska = 3, "street", "way"  # no of elements, roles
 
 true_way_warszawska_nd = [
     108213, 108215, 108217, 108219, 108221, 108223,
@@ -33,6 +33,7 @@ true_meta_timestamp = datetime(2020, 2, 14, 13, 1, 15, tzinfo=timezone.utc)
 true_meta_visible = True
 true_meta_user = "Natsuyasumi"
 true_meta_uid = 1384396
+
 
 def actually_verify(feature_iterator, is_pbf=False):
 
@@ -57,7 +58,6 @@ def actually_verify(feature_iterator, is_pbf=False):
 
             if not is_pbf:
                 assert feature["visible"] == true_meta_visible
-
 
         # Check relations
         if feature["type"] == "relation":
@@ -98,7 +98,7 @@ def actually_verify(feature_iterator, is_pbf=False):
                 node_parking += 1
 
             elif feature["tag"].get("tourism") == "hotel" and feature["tag"].get("name"):
-                 node_namedhotels += 1
+                node_namedhotels += 1
 
     assert rel_count == true_rel_count
     assert way_count == true_way_count
@@ -111,18 +111,22 @@ def actually_verify(feature_iterator, is_pbf=False):
     assert node_giveway == true_node_giveway
     assert node_parking == true_node_parking
 
+
 def test_xml_str_source():
     source = "tests/example.osm"
-    actually_verify( osmiter.iter_from_osm(source) )
+    actually_verify(osmiter.iter_from_osm(source))
+
 
 def test_gzip_bytes_source():
     source = os.fsencode("tests/example.osm.gz")
-    actually_verify( osmiter.iter_from_osm(source) )
+    actually_verify(osmiter.iter_from_osm(source))
+
 
 def test_bz2_buffer_source():
     with open("tests/example.osm.bz2", mode="rb") as source:
-        actually_verify( osmiter.iter_from_osm(source, file_format="bz2") )
+        actually_verify(osmiter.iter_from_osm(source, file_format="bz2"))
+
 
 def test_pbf_str_source():
     source = "tests/example.osm.pbf"
-    actually_verify( osmiter.iter_from_osm(source), is_pbf=True )
+    actually_verify(osmiter.iter_from_osm(source), is_pbf=True)

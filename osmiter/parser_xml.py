@@ -8,8 +8,10 @@ try:
 except ImportError:
     import xml.etree.ElementTree as etree
 
+
 class OSMError(RuntimeError):
     pass
+
 
 def _osm_attributes(attributes):
     result = {}
@@ -40,6 +42,7 @@ def _osm_attributes(attributes):
 
     return result
 
+
 def iter_from_xml_buffer(buff: BinaryIO) -> Iterator[dict]:
 
     buff.seek(0)
@@ -69,5 +72,3 @@ def iter_from_xml_buffer(buff: BinaryIO) -> Iterator[dict]:
             item["member"] = [_osm_attributes(i.attrib) for i in elem.iter("member")]
 
         yield item
-
-

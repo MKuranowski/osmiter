@@ -10,9 +10,11 @@ from .pbf.osmformat_pb2 import HeaderBlock, PrimitiveBlock
 # pylint: disable=E1101
 # pylint doesn't understand the reflecion done by protobuff implementation
 
+
 def _dummy_iterator(thing=None):
     while True:
         yield thing
+
 
 def _get_field(message, attr, default=None):
     if message.HasField(attr):
@@ -21,8 +23,10 @@ def _get_field(message, attr, default=None):
     else:
         return default
 
+
 class PBFError(RuntimeError):
     pass
+
 
 class ParserPbf:
 
@@ -113,7 +117,7 @@ class ParserPbf:
 
         if blob_header.type != verify_header_type:
             raise PBFError(
-                f"expected a BlobHeader of type {verify_header_type}, "\
+                f"expected a BlobHeader of type {verify_header_type}, "
                 f"but got {blob_header.type}"
             )
 
@@ -378,6 +382,7 @@ class ParserPbf:
                 })
 
             yield item
+
 
 def iter_from_pbf_buffer(buff: BinaryIO) -> Iterator[dict]:
     """Yields all items inside a given OSM PBF file.
