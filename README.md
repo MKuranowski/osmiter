@@ -166,6 +166,80 @@ See the corresponding [OSM XML examples](https://wiki.openstreetmap.org/wiki/OSM
 }
 ```
 
+## Reference
+
+---
+
+### osmiter.iter_from_osm
+```
+iter_from_osm(  
+    source: Union[str, bytes, int, BinaryIO],  
+    file_format: Union[str, NoneType] = None,  
+    filter_attrs: Union[Iterable[str], NoneType] = None) -> Iterator[dict]
+```
+
+Yields all items from provided source file.
+
+If source is a str/bytes (path) the format will be guess based on file extension.
+Otherwise, if source is an int (file descriptior) or a file-like object,
+the `format` argument must be provided, if the file format is different then OSM XML.
+
+File-like sources have to be opened in binary mode.
+Format has to be one of "xml", "gz", "bz2", "pbf".
+
+osmiter spends most of its time parsing element attributes.
+If only specific attributes are going to be used, pass an Iterable (most likely a set)
+with wanted attributes to `filter_attrs`.
+
+No matter what attributes you define in `filter_attrs`, some attributes are always parsed:
+- "id", "lat" and "lon": for nodes
+- "id": for ways and relations
+- "type", "ref" and "role": for members
+
+`filter_attrs` ignored for pbf files.
+
+---
+
+### osmiter.iter_from_xml_buffer
+```
+iter_from_xml_buffer(
+    buff: BinaryIO,
+    filter_attrs: Union[Iterable[str], NoneType] = None) -> Iterator[dict]
+```
+
+Yields all items inside a given OSM XML buffer.
+`filter_attrs` is explained in osmiter.iter_from_osm documentation.
+
+---
+
+### osmiter.parser_xml.iter_from_xml_buffer
+Same as `osmiter.iter_from_xml_buffer`.
+
+---
+
+### osmiter.iter_from_pbf_buffer
+```
+iter_from_pbf_buffer(buff: BinaryIO) -> Iterator[dict]
+```
+
+Yields all items inside a given OSM PBF file.
+
+---
+
+### osmiter.parser_pbf.iter_from_pbf_buffer
+Same as `osmiter.iter_from_pbf_buffer`.
+
+---
+
+### osmiter.parser_pbf.ParserPbf
+Internal object used to parse PBF files. Don't use.
+
+---
+
+### osmiter.parser_pbf.PBFError
+An Exception (inheriting from `RuntimeException`), used to represent issues with OSM PBF files.
+
+---
 
 ## License
 

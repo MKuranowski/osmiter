@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import BinaryIO, Iterator
+from typing import BinaryIO, Iterable, Iterator, Optional
 import iso8601
 import io
 
@@ -13,10 +13,14 @@ class OSMError(RuntimeError):
     pass
 
 
-def _osm_attributes(attributes):
+def _osm_attributes(attributes, filter_attrs):
     result = {}
 
     for k, v in attributes.items():
+        # check if attr filter was given and k should be parsed
+        if filter_attrs is not None and k not in filter_attrs:
+            continue
+
         # convert some keys to int
         if k in {"id", "ref", "version", "changeset", "uid", "comments_count"}:
             v = int(v)
@@ -43,10 +47,26 @@ def _osm_attributes(attributes):
     return result
 
 
-def iter_from_xml_buffer(buff: BinaryIO) -> Iterator[dict]:
+def iter_from_xml_buffer(
+        buff: BinaryIO,
+        filter_attrs: Optional[Iterable[str]] = None) -> Iterator[dict]:
+    """Yields all items inside a given OSM XML buffer.
+    `filter_attrs` is explained in osmiter.iter_from_osm documentation.
+    """
 
     buff.seek(0)
 
+    # Set attribute filters
+    if filter_attrs is not None:
+        node_attrs = {"id", "lat", "lon"}.union(filter_attrs)
+        wayrel_attrs = {"id"}.union(filter_attrs)
+        member_attrs = {"type", "ref", "role"}.union(filter_attrs)
+    else:
+        node_attrs = None
+        wayrel_attrs = None
+        member_attrs = None
+
+    # Iterate over elements in OSM data
     for _, elem in etree.iterparse(buff, events=["end"]):
 
         # Only interested in fully-populated elements
@@ -56,7 +76,12 @@ def iter_from_xml_buffer(buff: BinaryIO) -> Iterator[dict]:
         item = {}
         item["type"] = elem.tag
         item["tag"] = {i.attrib["k"]: i.attrib["v"] for i in elem.iter("tag")}
-        item.update(_osm_attributes(elem.attrib))
+
+        # Update attributes
+        if elem.tag == "node":
+            item.update(_osm_attributes(elem.attrib, node_attrs))
+        else:
+            item.update(_osm_attributes(elem.attrib, wayrel_attrs))
 
         if "id" not in item:
             raise OSMError("osm file contains a feature without id")
@@ -69,6 +94,6 @@ def iter_from_xml_buffer(buff: BinaryIO) -> Iterator[dict]:
             item["nd"] = [int(i.attrib["ref"]) for i in elem.iter("nd")]
 
         elif elem.tag == "relation":
-            item["member"] = [_osm_attributes(i.attrib) for i in elem.iter("member")]
+            item["member"] = [_osm_attributes(i.attrib, member_attrs) for i in elem.iter("member")]
 
         yield item

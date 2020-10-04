@@ -1,4 +1,4 @@
-from typing import Union, BinaryIO, Iterator, Optional
+from typing import Union, BinaryIO, Iterator, Optional, Iterable
 import gzip
 import bz2
 import os
@@ -19,7 +19,8 @@ __email__ = "".join(chr(i) for i in [109, 107, 117, 114, 97, 110, 111, 119, 115,
 
 def iter_from_osm(
         source: Union[str, bytes, int, BinaryIO],
-        file_format: Optional[str] = None) -> Iterator[dict]:
+        file_format: Optional[str] = None,
+        filter_attrs: Optional[Iterable[str]] = None) -> Iterator[dict]:
     """Yields all items from provided source file.
 
     If source is a str/bytes (path) the format will be guess based on file extension.
@@ -27,8 +28,18 @@ def iter_from_osm(
     the `format` argument must be provided, if the file format is different then OSM XML.
 
     File-like sources have to be opened in binary mode.
-
     Format has to be one of "xml", "gz", "bz2", "pbf".
+
+    osmiter spends most of its time parsing element attributes.
+    If only specific attributes are going to be used, pass an Iterable (most likely a set)
+    with wanted attributes to filter_attrs.
+
+    No matter what attributes you define in filter_attrs, some attributes are always parsed:
+    - "id", "lat" and "lon": for nodes
+    - "id": for ways and relations
+    - "type", "ref" and "role": for members
+
+    `filter_attrs` is ignored for pbf files.
     """
 
     # Convert byte paths to str
@@ -66,19 +77,19 @@ def iter_from_osm(
 
         else:
             with open(source, mode="rb") as f:
-                yield from iter_from_xml_buffer(f)
+                yield from iter_from_xml_buffer(f, filter_attrs)
 
     # gzip compression
     elif file_format == "gz":
 
         with gzip.open(source, mode="rb") as decompressed_buff:
-            yield from iter_from_xml_buffer(decompressed_buff)
+            yield from iter_from_xml_buffer(decompressed_buff, filter_attrs)
 
     # bz2 compression
     elif file_format == "bz2":
 
         with bz2.open(source, mode="rb") as decompressed_buff:
-            yield from iter_from_xml_buffer(decompressed_buff)
+            yield from iter_from_xml_buffer(decompressed_buff, filter_attrs)
 
     # pbf format
     elif file_format == "pbf":
