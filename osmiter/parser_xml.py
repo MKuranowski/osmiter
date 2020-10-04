@@ -96,4 +96,5 @@ def iter_from_xml_buffer(
         elif elem.tag == "relation":
             item["member"] = [_osm_attributes(i.attrib, member_attrs) for i in elem.iter("member")]
 
+        elem.clear()
         yield item
