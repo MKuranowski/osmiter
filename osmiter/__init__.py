@@ -1,4 +1,4 @@
-from typing import Union, BinaryIO, Iterator, Optional, Iterable
+from typing import IO, Union, Iterator, Optional, Iterable
 import gzip
 import bz2
 import os
@@ -18,7 +18,7 @@ __email__ = "".join(chr(i) for i in [109, 107, 117, 114, 97, 110, 111, 119, 115,
 
 
 def iter_from_osm(
-        source: Union[str, bytes, int, BinaryIO],
+        source: Union[str, bytes, int, IO[bytes]],
         file_format: Optional[str] = None,
         filter_attrs: Optional[Iterable[str]] = None) -> Iterator[dict]:
     """Yields all items from provided source file.

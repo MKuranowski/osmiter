@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
-from typing import BinaryIO, Iterable, Iterator, Optional
+from typing import Any, Dict, IO, Iterable, Iterator, Mapping, Optional
+
 import iso8601
-import io
 
 try:
     from lxml import etree
@@ -13,7 +13,9 @@ class OSMError(RuntimeError):
     pass
 
 
-def _osm_attributes(attributes, filter_attrs):
+def _osm_attributes(attributes: Mapping[str, str],
+                    filter_attrs: Optional[Iterable[str]]) -> Dict[str, Any]:
+    """Parses and converts OSM attributes"""
     result = {}
 
     for k, v in attributes.items():
@@ -48,7 +50,7 @@ def _osm_attributes(attributes, filter_attrs):
 
 
 def iter_from_xml_buffer(
-        buff: BinaryIO,
+        buff: IO[bytes],
         filter_attrs: Optional[Iterable[str]] = None) -> Iterator[dict]:
     """Yields all items inside a given OSM XML buffer.
     `filter_attrs` is explained in osmiter.iter_from_osm documentation.
