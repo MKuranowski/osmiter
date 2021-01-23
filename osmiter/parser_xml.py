@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Any, Dict, IO, Iterable, Iterator, Mapping, Optional
+from typing import Any, Container, Dict, IO, Iterable, Iterator, Mapping, Optional
 
 import iso8601
 
@@ -14,7 +14,7 @@ class OSMError(RuntimeError):
 
 
 def _osm_attributes(attributes: Mapping[str, str],
-                    filter_attrs: Optional[Iterable[str]]) -> Dict[str, Any]:
+                    filter_attrs: Optional[Container[str]]) -> Dict[str, Any]:
     """Parses and converts OSM attributes"""
     result = {}
 
