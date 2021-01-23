@@ -155,17 +155,17 @@ class ParserPbf:
 
     def _read_denseinfo(self, dinfo_item: DenseInfo) -> Iterator[Dict[str, Any]]:
         """Parse all parallel arrays of a DenseInfo object"""
-        get_iterator = lambda attr_name, fallback: \
-            getattr(dinfo_item, attr_name) if len(getattr(dinfo_item, attr_name)) > 0 \
-            else _dummy_iterator(fallback)
+        def get_iterator(attr_name, fallback=None):
+            obj = getattr(dinfo_item, attr_name)
+            return obj if obj else _dummy_iterator(fallback)
 
         # Iterators for all metadata
         versions: Iterator[int] = get_iterator("version", -1)
-        tstamps: Iterator[Optional[int]] = get_iterator("timestamp", None)
-        changesets: Iterator[Optional[int]] = get_iterator("changeset", None)
-        uids: Iterator[Optional[int]] = get_iterator("uid", None)
-        user_sids: Iterator[Optional[int]] = get_iterator("user_sid", None)
-        visibles: Iterator[Optional[bool]] = get_iterator("visible", None)
+        tstamps: Iterator[Optional[int]] = get_iterator("timestamp")
+        changesets: Iterator[Optional[int]] = get_iterator("changeset")
+        uids: Iterator[Optional[int]] = get_iterator("uid")
+        user_sids: Iterator[Optional[int]] = get_iterator("user_sid")
+        visibles: Iterator[Optional[bool]] = get_iterator("visible")
 
         # Delta Coded Values
         tstamp = 0
