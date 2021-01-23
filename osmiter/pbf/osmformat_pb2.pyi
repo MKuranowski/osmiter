@@ -1,8 +1,8 @@
 # Warning! These stubs are not complete, and only
 # contain methods and attributes used by osmiter.
 
-from typing import List, Literal
-from enum import Enum
+from typing import List
+from typing_extensions import Literal
 
 class _AbstractMessage:
     def ParseFromString(self, seralized: bytes) -> None: ...

@@ -1,7 +1,9 @@
-from typing import IO, Literal, Union, Iterator, Optional, Iterable
-import gzip
 import bz2
+import gzip
 import os
+from typing import IO, Iterable, Iterator, Optional, Union
+
+from typing_extensions import Literal
 
 from .parser_pbf import iter_from_pbf_buffer
 from .parser_xml import iter_from_xml_buffer

@@ -32,7 +32,7 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
     packages=find_packages(),
-    install_requires=["iso8601", "protobuf"],
+    install_requires=["iso8601", "protobuf", "typing_extensions"],
     python_requires=">=3.6, <4",
     data_files=["readme.md", "license.md"],
 )
