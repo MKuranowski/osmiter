@@ -1,4 +1,4 @@
-from typing import IO, Union, Iterator, Optional, Iterable
+from typing import IO, Literal, Union, Iterator, Optional, Iterable
 import gzip
 import bz2
 import os
@@ -18,20 +18,20 @@ __email__ = "".join(chr(i) for i in [109, 107, 117, 114, 97, 110, 111, 119, 115,
 
 
 def iter_from_osm(
-        source: Union[str, bytes, int, IO[bytes]],
-        file_format: Optional[str] = None,
+        source: Union[str, bytes, os.PathLike, int, IO[bytes]],
+        file_format: Optional[Literal["xml", "gz", "bz2", "pbf"]] = None,
         filter_attrs: Optional[Iterable[str]] = None) -> Iterator[dict]:
     """Yields all items from provided source file.
 
-    If source is a str/bytes (path) the format will be guess based on file extension.
+    If source is a str/bytes/os.PathLike (path) the format will be guess based on file extension.
     Otherwise, if source is an int (file descriptior) or a file-like object,
-    the `format` argument must be provided, if the file format is different then OSM XML.
+    the `file_format` argument must be provided.
 
     File-like sources have to be opened in binary mode.
     Format has to be one of "xml", "gz", "bz2", "pbf".
 
     osmiter spends most of its time parsing element attributes.
-    If only specific attributes are going to be used, pass an Iterable (most likely a set)
+    If only specific attributes are going to be used, pass an Iterable (most prefereably a set)
     with wanted attributes to filter_attrs.
 
     No matter what attributes you define in filter_attrs, some attributes are always parsed:
@@ -42,61 +42,58 @@ def iter_from_osm(
     `filter_attrs` is ignored for pbf files.
     """
 
-    # Convert byte paths to str
-    if type(source) is bytes:
-        source = os.fsdecode(source)
+    # Try to guess the extension
+    if file_format is None:
+        if hasattr(source, "read") or isinstance(source, int):
+            raise ValueError("file_format is required for file-like or file-descriptor sources")
 
-    # detect file format
-    if type(source) is str and file_format is None:
-        if source.endswith((".osm", ".xml")):
+        fname = os.fsdecode(source)  # type: ignore
+        if fname.endswith((".osm", ".xml")):
             file_format = "xml"
 
-        elif source.endswith((".osm.gz", ".xml.gz")):
+        elif fname.endswith((".osm.gz", ".xml.gz")):
             file_format = "gz"
 
-        elif source.endswith((".osm.bz2", ".xml.bz2")):
+        elif fname.endswith((".osm.bz2", ".xml.bz2")):
             file_format = "bz2"
 
-        elif source.endswith((".osm.pbf", ".osm.pb")):
+        elif fname.endswith((".osm.pbf", ".osm.pb")):
             file_format = "pbf"
 
         else:
             raise ValueError(f"unable to guess OSM file format for file name: {source!r}")
 
-    # check if valid file format is provided
+    # Check if valid file format is provided
     if file_format not in {"xml", "gz", "bz2", "pbf"}:
         raise ValueError(f"invalid file format {file_format!r}")
 
-    file_like = hasattr(source, "read")
+    # Try to open the file
+    buffer_provided: bool = hasattr(source, "read")
+    buffer: IO[bytes] = source if buffer_provided else open(source, mode="rb")  # type: ignore
 
-    # simple xml
-    if file_format == "xml":
+    # Parse file contents
+    try:
+        # simple xml
+        if file_format == "xml":
+            yield from iter_from_xml_buffer(buffer)
 
-        if file_like:
-            yield from iter_from_xml_buffer(source)
+        # gzip compression
+        elif file_format == "gz":
 
-        else:
-            with open(source, mode="rb") as f:
-                yield from iter_from_xml_buffer(f, filter_attrs)
+            with gzip.open(buffer, mode="rb") as decompressed_buff:
+                yield from iter_from_xml_buffer(decompressed_buff, filter_attrs)  # type: ignore
 
-    # gzip compression
-    elif file_format == "gz":
+        # bz2 compression
+        elif file_format == "bz2":
 
-        with gzip.open(source, mode="rb") as decompressed_buff:
-            yield from iter_from_xml_buffer(decompressed_buff, filter_attrs)
+            with bz2.open(buffer, mode="rb") as decompressed_buff:
+                yield from iter_from_xml_buffer(decompressed_buff, filter_attrs)
 
-    # bz2 compression
-    elif file_format == "bz2":
+        # pbf format
+        elif file_format == "pbf":
+            yield from iter_from_pbf_buffer(buffer)
 
-        with bz2.open(source, mode="rb") as decompressed_buff:
-            yield from iter_from_xml_buffer(decompressed_buff, filter_attrs)
-
-    # pbf format
-    elif file_format == "pbf":
-
-        if file_like:
-            yield from iter_from_pbf_buffer(source)
-
-        else:
-            with open(source, mode="rb") as f:
-                yield from iter_from_pbf_buffer(f)
+    # Ensure buffer closure
+    finally:
+        if not buffer_provided:
+            buffer.close()
