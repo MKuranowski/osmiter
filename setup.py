@@ -13,14 +13,14 @@ setup(
     name="osmiter",
     py_modules=["osmiter"],
     license="MIT",
-    version="1.1.0",
+    version="1.1.1",
     description="Library for reading OSM XML/GZ/BZ2/PBF files",
     long_description=readme,
     long_description_content_type="text/markdown",
     author="Mikołaj Kuranowski",
     author_email="".join(chr(i) for i in [
-        109, 107, 117, 114, 97, 110, 111, 119, 115, 107, 105, 64,
-        103, 109, 97, 105, 108, 46, 99, 111, 109]),
+        109, 107, 117, 114, 97, 110, 111, 119, 115, 107, 105, 32, 91, 1072,
+        116, 93, 32, 103, 109, 97, 105, 108, 46, 99, 111, 109]),
     url="https://github.com/MKuranowski/osmiter",
     keywords="osm xml gz pz2 pbf openstreetmap parser",
     classifiers=[
@@ -33,4 +33,6 @@ setup(
     ],
     packages=find_packages(),
     install_requires=["iso8601", "protobuf"],
+    python_requires=">=3.6, <4",
+    data_files=["readme.md", "license.md"],
 )

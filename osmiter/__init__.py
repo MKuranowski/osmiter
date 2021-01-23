@@ -12,9 +12,9 @@ __url__ = "https://github.com/MKuranowski/osmiter"
 __author__ = "Mikołaj Kuranowski"
 __copyright__ = "Copyright 2020 Mikolaj Kuranowski"
 __license__ = "MIT"
-__version__ = "1.1.0"
-__email__ = "".join(chr(i) for i in [109, 107, 117, 114, 97, 110, 111, 119, 115, 107, 105, 64,
-                                     103, 109, 97, 105, 108, 46, 99, 111, 109])
+__version__ = "1.1.1"
+__email__ = "".join(chr(i) for i in [109, 107, 117, 114, 97, 110, 111, 119, 115, 107, 105, 32, 91,
+                                     1072, 116, 93, 32, 103, 109, 97, 105, 108, 46, 99, 111, 109])
 
 
 def iter_from_osm(
