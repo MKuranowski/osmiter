@@ -55,9 +55,6 @@ def iter_from_xml_buffer(
     """Yields all items inside a given OSM XML buffer.
     `filter_attrs` is explained in osmiter.iter_from_osm documentation.
     """
-
-    buff.seek(0)
-
     # Set attribute filters
     if filter_attrs is not None:
         node_attrs = {"id", "lat", "lon"}.union(filter_attrs)

@@ -381,7 +381,5 @@ class ParserPbf:
 def iter_from_pbf_buffer(buff: IO[bytes]) -> Iterator[dict]:
     """Yields all items inside a given OSM PBF buffer.
     """
-
-    buff.seek(0)
     parser = ParserPbf(buff)
     yield from parser.parse()
