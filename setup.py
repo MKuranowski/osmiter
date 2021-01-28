@@ -1,9 +1,9 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 # new release walkthrough:
 # python3 -m pytest
 # bump __version__
-# python3 setup.py sdist
+# python3 setup.py sdist bdist_wheel
 # python3 -m twine upload dist/*filename*
 
 with open("README.md", "r", encoding="utf-8") as f:
@@ -31,8 +31,8 @@ setup(
         "Topic :: Scientific/Engineering :: GIS",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
-    packages=find_packages(),
+    packages=["osmiter", "osmiter.pbf"],
     install_requires=["iso8601", "protobuf", "typing_extensions"],
     python_requires=">=3.6, <4",
-    data_files=["readme.md", "license.md"],
+    data_files=["README.md", "license.md"],
 )
