@@ -13,7 +13,7 @@ setup(
     name="osmiter",
     py_modules=["osmiter"],
     license="MIT",
-    version="1.1.1",
+    version="1.2.0",
     description="Library for reading OSM XML/GZ/BZ2/PBF files",
     long_description=readme,
     long_description_content_type="text/markdown",
