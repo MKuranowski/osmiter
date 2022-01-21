@@ -77,7 +77,7 @@ def iter_from_osm(
     try:
         # simple xml
         if file_format == "xml":
-            yield from iter_from_xml_buffer(buffer)
+            yield from iter_from_xml_buffer(buffer, filter_attrs)
 
         # gzip compression
         elif file_format == "gz":
