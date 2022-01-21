@@ -1,12 +1,9 @@
 from datetime import datetime, timezone
-from typing import Any, Container, Dict, IO, Iterable, Iterator, Mapping, Optional
+from typing import Any, Container, Dict, IO, Iterable, Iterator, List, Mapping, Optional
+from xml.sax.handler import ContentHandler as SAXContentHandler
+from xml.sax.expatreader import ExpatParser
 
 import iso8601
-
-try:
-    from lxml import etree
-except ImportError:
-    import xml.etree.ElementTree as etree
 
 
 class OSMError(RuntimeError):
@@ -49,51 +46,103 @@ def _osm_attributes(attributes: Mapping[str, str],
     return result
 
 
+class OSMContentHandler(SAXContentHandler):
+    """ContentHandler is a SAX Content Handler that collects encountered OSM elements"""
+    def __init__(self, filter_attrs: Optional[Iterable[str]]) -> None:
+        super().__init__()
+        # All fully-processed features
+        self.features: List[Dict[str, Any]] = []
+
+        # Feature currently being processed
+        self.feature: Dict[str, Any] = {}
+
+        # Attribute filters for speed
+        if filter_attrs is not None:
+            self.node_attrs = {"id", "lat", "lon"}.union(filter_attrs)
+            self.wayrel_attrs = {"id"}.union(filter_attrs)
+            self.member_attrs = {"type", "ref", "role"}.union(filter_attrs)
+        else:
+            self.node_attrs = None
+            self.wayrel_attrs = None
+            self.member_attrs = None
+
+    def startElement(self, name: str, attrs: Mapping[str, str]):
+        """Handler when an XML element starts"""
+        # New feature - reset `self.feature` & set attributes
+        if name == "node":
+            self.feature = {"type": name, "tag": {}}
+            self.feature.update(_osm_attributes(attrs, self.node_attrs))
+
+        elif name == "way":
+            self.feature = {"type": name, "tag": {}, "nd": []}
+            self.feature.update(_osm_attributes(attrs, self.wayrel_attrs))
+
+        elif name == "relation":
+            self.feature = {"type": name, "tag": {}, "member": []}
+            self.feature.update(_osm_attributes(attrs, self.wayrel_attrs))
+
+        # Nested xml elements
+
+        elif name == "tag":
+            self.feature["tag"][attrs["k"]] = attrs["v"]
+
+        elif name == "nd":
+            assert self.feature["type"] == "way"
+            self.feature["nd"].append(int(attrs["ref"]))
+
+        elif name == "member":
+            assert self.feature["type"] == "relation"
+            self.feature["member"].append(_osm_attributes(attrs, self.member_attrs))
+
+    def endElement(self, name: str):
+        """Handler when an XML element ends"""
+        # We only care about closing of features
+        if name not in {"node", "way", "relation"}:
+            return
+
+        # Sanity checks
+        if "id" not in self.feature:
+            raise OSMError("osm file contains a feature without id")
+
+        if name == "node":
+            if "lat" not in self.feature or "lon" not in self.feature:
+                raise OSMError(f"osm node {self.feature['id']} has no lat/lon")
+
+        # Move feature to processed features
+        self.features.append(self.feature)
+        self.feature = {}
+
+
 def iter_from_xml_buffer(
         buff: IO[bytes],
-        filter_attrs: Optional[Iterable[str]] = None) -> Iterator[dict]:
+        filter_attrs: Optional[Iterable[str]] = None,
+        read_chunk_size: int = 8192) -> Iterator[Dict[str, Any]]:
     """Yields all items inside a given OSM XML buffer.
     `filter_attrs` is explained in osmiter.iter_from_osm documentation.
     """
-    # Set attribute filters
-    if filter_attrs is not None:
-        node_attrs = {"id", "lat", "lon"}.union(filter_attrs)
-        wayrel_attrs = {"id"}.union(filter_attrs)
-        member_attrs = {"type", "ref", "role"}.union(filter_attrs)
-    else:
-        node_attrs = None
-        wayrel_attrs = None
-        member_attrs = None
+    # Create helper objects
+    handler = OSMContentHandler(filter_attrs)
+    parser = ExpatParser()
+    parser.setContentHandler(handler)
 
-    # Iterate over elements in OSM data
-    for _, elem in etree.iterparse(buff, events=["end"]):
+    # Read data in chunks
+    data = buff.read(read_chunk_size)
+    while data:
+        # Parse XML
+        parser.feed(data)
 
-        # Only interested in fully-populated elements
-        if elem.tag not in {"node", "way", "relation"}:
-            continue
+        # Check if some features are available -
+        # if so _move_ them to the user (so that we can discard them).
+        if handler.features:
+            yield from handler.features
+            handler.features = []
 
-        item = {}
-        item["type"] = elem.tag
-        item["tag"] = {i.attrib["k"]: i.attrib["v"] for i in elem.iter("tag")}
+        # Read next chunk
+        data = buff.read(read_chunk_size)
 
-        # Update attributes
-        if elem.tag == "node":
-            item.update(_osm_attributes(elem.attrib, node_attrs))
-        else:
-            item.update(_osm_attributes(elem.attrib, wayrel_attrs))
+    # Finalize the parser
+    parser.close()
 
-        if "id" not in item:
-            raise OSMError("osm file contains a feature without id")
-
-        if elem.tag == "node":
-            if "lat" not in item or "lon" not in item:
-                raise OSMError(f"osm node {item['id']} has no lat/lon")
-
-        elif elem.tag == "way":
-            item["nd"] = [int(i.attrib["ref"]) for i in elem.iter("nd")]
-
-        elif elem.tag == "relation":
-            item["member"] = [_osm_attributes(i.attrib, member_attrs) for i in elem.iter("member")]
-
-        elem.clear()
-        yield item
+    # Final check if some features are left
+    if handler.features:
+        yield from handler.features
