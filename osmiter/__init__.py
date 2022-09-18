@@ -1,7 +1,7 @@
 import bz2
 import gzip
 import os
-from typing import IO, Iterable, Iterator, Optional, Union
+from typing import IO, Any, Dict, Iterable, Iterator, Optional, Union
 
 from typing_extensions import Literal
 
@@ -20,9 +20,9 @@ __email__ = "".join(chr(i) for i in [109, 107, 117, 114, 97, 110, 111, 119, 115,
 
 
 def iter_from_osm(
-        source: Union[str, bytes, os.PathLike, int, IO[bytes]],
+        source: Union[str, bytes, os.PathLike[Any], int, IO[bytes]],
         file_format: Optional[Literal["xml", "gz", "bz2", "pbf"]] = None,
-        filter_attrs: Optional[Iterable[str]] = None) -> Iterator[dict]:
+        filter_attrs: Optional[Iterable[str]] = None) -> Iterator[Dict[str, Any]]:
     """Yields all items from provided source file.
 
     If source is a str/bytes/os.PathLike (path) the format will be guess based on file extension.
