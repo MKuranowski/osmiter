@@ -1,12 +1,13 @@
+import itertools
 import lzma
 import struct
 import zlib
-import itertools
 from datetime import datetime, timezone
-from typing import IO, Any, Dict, Iterable, Iterator, Optional, Sequence, TypeVar
+from typing import (IO, Any, Dict, Iterable, Iterator, Optional, Sequence,
+                    TypeVar)
 
 from .pbf.fileformat_pb2 import Blob, BlobHeader
-from .pbf.osmformat_pb2 import (DenseInfo, DenseNodes, HeaderBlock, Info, Node,
+from .pbf.osmformat_pb2 import (DenseNodes, HeaderBlock, Info, Node,
                                 PrimitiveBlock, PrimitiveGroup, Relation, Way)
 
 _T = TypeVar("_T")
@@ -147,15 +148,18 @@ class ParserPbf:
 
         return info_dict
 
-    def _read_denseinfo(self, dinfo: DenseInfo) -> Iterator[Dict[str, Any]]:
+    def _read_denseinfo(self, all_dense: DenseNodes) -> Iterator[Dict[str, Any]]:
         """Parse all parallel arrays of a DenseInfo object"""
+        if not all_dense.HasField("denseinfo"):
+            return itertools.repeat({})
+
         # Iterators for all metadata
-        versions = dinfo.version or itertools.repeat(0)
-        tstamps = dinfo.timestamp or itertools.repeat(None)
-        changesets = dinfo.changeset or itertools.repeat(None)
-        uids = dinfo.uid or itertools.repeat(None)
-        user_sids = dinfo.user_sid or itertools.repeat(None)
-        visibles = dinfo.visible or itertools.repeat(None)
+        versions = all_dense.denseinfo.version or itertools.repeat(0)
+        tstamps = all_dense.denseinfo.timestamp or itertools.repeat(None)
+        changesets = all_dense.denseinfo.changeset or itertools.repeat(None)
+        uids = all_dense.denseinfo.uid or itertools.repeat(None)
+        user_sids = all_dense.denseinfo.user_sid or itertools.repeat(None)
+        visibles = all_dense.denseinfo.visible or itertools.repeat(None)
 
         # Delta Coded Values
         tstamp: int = 0
@@ -208,6 +212,10 @@ class ParserPbf:
 
     def _get_dense_tags(self, keys_vals: Sequence[int]) -> Iterator[Dict[str, str]]:
         """Decode the keys_vals array of a DenseNodes message."""
+        if not keys_vals:
+            while True:
+                yield {}
+
         # WHO THOUGHT THIS IS A GREAT IDEA??????
         tag_index = 0
         max_item = len(keys_vals)
@@ -280,18 +288,10 @@ class ParserPbf:
             raise PBFError("Encountered a DenseNodes message with no longitudes!")
 
         # Dense Info
-        # TODO: move the if-else into the _read_denseinfo method
-        dense_info: Iterator[Dict[str, Any]] = \
-            self._read_denseinfo(all_dense.denseinfo) \
-            if all_dense.HasField("denseinfo") \
-            else itertools.repeat({})
+        dense_info = self._read_denseinfo(all_dense)
 
         # Tags
-        # TODO: move the if-else into the _get_dense_tags method
-        tags: Iterator[Dict[str, str]] = \
-            self._get_dense_tags(all_dense.keys_vals) \
-            if all_dense.keys_vals \
-            else itertools.repeat({})
+        tags = self._get_dense_tags(all_dense.keys_vals)
 
         # Wrapping-up the generator
         item_generator = zip(
