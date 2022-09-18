@@ -32,4 +32,5 @@ setup(
     install_requires=["iso8601", "protobuf", "typing_extensions"],
     python_requires=">=3.6, <4",
     data_files=["README.md", "license.md"],
+    package_data={"osmiter": ["py.typed"]},
 )
