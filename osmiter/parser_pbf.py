@@ -1,28 +1,15 @@
 import lzma
 import struct
 import zlib
+import itertools
 from datetime import datetime, timezone
-from typing import IO, Any, Dict, Iterable, Iterator, List, Optional, Sequence
+from typing import IO, Any, Dict, Iterable, Iterator, Optional, Sequence, TypeVar
 
 from .pbf.fileformat_pb2 import Blob, BlobHeader
 from .pbf.osmformat_pb2 import (DenseInfo, DenseNodes, HeaderBlock, Info, Node,
                                 PrimitiveBlock, PrimitiveGroup, Relation, Way)
 
-# pylint: disable=E1101
-# pylint doesn't understand the reflecion done by protobuff implementation
-
-
-def _dummy_iterator(thing=None):
-    while True:
-        yield thing
-
-
-def _get_field(message, attr, default=None):
-    if message.HasField(attr):
-        return getattr(message, attr)
-
-    else:
-        return default
+_T = TypeVar("_T")
 
 
 class PBFError(RuntimeError):
@@ -30,13 +17,22 @@ class PBFError(RuntimeError):
 
 
 class ParserPbf:
+    buffer: IO[bytes]
+    granulity: int
+    offset_lat: int
+    offset_lon: int
+    string_table: Sequence[bytes]
+    tstamp_granulity: int
 
     def __init__(self, buffer: IO[bytes]) -> None:
         self.buffer = buffer
         self.clear_pblock_values()
 
-    def parse(self) -> Iterator[dict]:
+    def parse(self) -> Iterator[Dict[str, Any]]:
+        # Read the header
         blob_header = self._read_blob_header("OSMHeader")
+        if blob_header is None:
+            raise PBFError("OSMHeader missing (is the file empty?)")
         blob_data = self._read_blob(blob_header.datasize)
 
         osm_header = HeaderBlock()
@@ -60,31 +56,29 @@ class ParserPbf:
             # Save pblock attrs
             self.string_table = pblock.stringtable.s
 
-            self.granulity = _get_field(pblock, "granularity", 100)
-            self.offset_lat = _get_field(pblock, "lat_offset", 0)
-            self.offset_lon = _get_field(pblock, "lon_offset", 0)
-            self.tstamp_granulity = _get_field(pblock, "date_granularity", 1000)
+            self.granulity = pblock.granularity
+            self.offset_lat = pblock.lat_offset
+            self.offset_lon = pblock.lon_offset
+            self.tstamp_granulity = pblock.date_granularity
 
             # Parse data from all nested PrimitiveGroups
             yield from self._parse_pgroups(pblock.primitivegroup)
 
     @staticmethod
-    def check_required_features(required_features: Iterable[str]):
+    def check_required_features(required_features: Iterable[str]) -> None:
         for feature in required_features:
             if feature not in {"OsmSchema-V0.6", "DenseNodes"}:
                 raise PBFError(f"HeaderBlock requests feature {feature}, which is not implemented")
 
     def clear_pblock_values(self) -> None:
-        self.granulity: int = 100
-        self.offset_lat: int = 0
-        self.offset_lon: int = 0
-        self.string_table: List[bytes] = []
-        self.tstamp_granulity: int = 1000
+        self.granulity = 100
+        self.offset_lat = 0
+        self.offset_lon = 0
+        self.string_table = []
+        self.tstamp_granulity = 1000
 
     def _read_blob(self, blob_len: int) -> bytes:
-        """Return the decompressed blob, given its length.
-        """
-
+        """Return the decompressed blob, given its length."""
         blob = Blob()
         blob.ParseFromString(self.buffer.read(blob_len))
 
@@ -102,7 +96,7 @@ class ParserPbf:
 
     def _read_blob_header(self, verify_header_type: str) -> Optional[BlobHeader]:
         """Parse and return the BlobHeader, while verifying that its type is what is expected.
-        """
+        Returns None if EOF was reached in the PBF file."""
         header_len_raw = self.buffer.read(4)
 
         if len(header_len_raw) == 0:
@@ -153,25 +147,21 @@ class ParserPbf:
 
         return info_dict
 
-    def _read_denseinfo(self, dinfo_item: DenseInfo) -> Iterator[Dict[str, Any]]:
+    def _read_denseinfo(self, dinfo: DenseInfo) -> Iterator[Dict[str, Any]]:
         """Parse all parallel arrays of a DenseInfo object"""
-        def get_iterator(attr_name, fallback=None):
-            obj = getattr(dinfo_item, attr_name)
-            return obj if obj else _dummy_iterator(fallback)
-
         # Iterators for all metadata
-        versions: Iterator[int] = get_iterator("version", -1)
-        tstamps: Iterator[Optional[int]] = get_iterator("timestamp")
-        changesets: Iterator[Optional[int]] = get_iterator("changeset")
-        uids: Iterator[Optional[int]] = get_iterator("uid")
-        user_sids: Iterator[Optional[int]] = get_iterator("user_sid")
-        visibles: Iterator[Optional[bool]] = get_iterator("visible")
+        versions = dinfo.version or itertools.repeat(0)
+        tstamps = dinfo.timestamp or itertools.repeat(None)
+        changesets = dinfo.changeset or itertools.repeat(None)
+        uids = dinfo.uid or itertools.repeat(None)
+        user_sids = dinfo.user_sid or itertools.repeat(None)
+        visibles = dinfo.visible or itertools.repeat(None)
 
         # Delta Coded Values
-        tstamp = 0
-        changeset = 0
-        uid = 0
-        user_sid = 0
+        tstamp: int = 0
+        changeset: int = 0
+        uid: int = 0
+        user_sid: int = 0
 
         for version, dtstamp, dchangeset, duid, duser_sid, visible in \
                 zip(versions, tstamps, changesets, uids, user_sids, visibles):
@@ -206,7 +196,7 @@ class ParserPbf:
 
     def _get_tags(self, keys: Sequence[int], values: Sequence[int]) -> Dict[str, str]:
         """Parse parallel arrays of keys and values and return a dict with object's tags"""
-        tags = {}
+        tags: Dict[str, str] = {}
 
         if len(keys) > 0 and len(values) > 0:
 
@@ -223,7 +213,7 @@ class ParserPbf:
         max_item = len(keys_vals)
 
         while tag_index < max_item:
-            tags = {}
+            tags: Dict[str, Any] = {}
 
             while keys_vals[tag_index] != 0:
                 k = keys_vals[tag_index]
@@ -236,7 +226,7 @@ class ParserPbf:
             yield tags
             tag_index += 1
 
-    def _parse_pgroups(self, all_groups: Iterable[PrimitiveGroup]) -> Iterator[dict]:
+    def _parse_pgroups(self, all_groups: Iterable[PrimitiveGroup]) -> Iterator[Dict[str, Any]]:
         """Yields all OSM features (nodes, ways, relations) from current PrimitiveBlock"""
         for group in all_groups:
 
@@ -252,7 +242,7 @@ class ParserPbf:
             elif len(group.relations) > 0:
                 yield from self._parse_rels(group.relations)
 
-    def _parse_nodes(self, all_nodes: Iterable[Node]) -> Iterator[dict]:
+    def _parse_nodes(self, all_nodes: Iterable[Node]) -> Iterator[Dict[str, Any]]:
         """Parse all Node messages and yield all found nodes."""
         for node in all_nodes:
             item: Dict[str, Any] = {"type": "node"}
@@ -268,7 +258,7 @@ class ParserPbf:
 
             yield item
 
-    def _parse_dense(self, all_dense: DenseNodes) -> Iterator[dict]:
+    def _parse_dense(self, all_dense: DenseNodes) -> Iterator[Dict[str, Any]]:
         """Return all nodes encoded inside a given DenseNodes element"""
         # start for delta_coding lats and lons
         node_lat, node_lon = 0, 0
@@ -276,7 +266,7 @@ class ParserPbf:
         # node ids, default to -1
         if len(all_dense.id) < 1:
             node_id = -1
-            id_generator = _dummy_iterator(0)
+            id_generator = itertools.repeat(0)
 
         else:
             node_id = 0
@@ -290,26 +280,29 @@ class ParserPbf:
             raise PBFError("Encountered a DenseNodes message with no longitudes!")
 
         # Dense Info
-        if all_dense.HasField("denseinfo"):
-            dense_info = self._read_denseinfo(all_dense.denseinfo)
-
-        else:
-            dense_info = _dummy_iterator(dict())
+        # TODO: move the if-else into the _read_denseinfo method
+        dense_info: Iterator[Dict[str, Any]] = \
+            self._read_denseinfo(all_dense.denseinfo) \
+            if all_dense.HasField("denseinfo") \
+            else itertools.repeat({})
 
         # Tags
-        if len(all_dense.keys_vals) > 0:
-            tags = self._get_dense_tags(all_dense.keys_vals)
-
-        else:
-            tags = _dummy_iterator(dict())
+        # TODO: move the if-else into the _get_dense_tags method
+        tags: Iterator[Dict[str, str]] = \
+            self._get_dense_tags(all_dense.keys_vals) \
+            if all_dense.keys_vals \
+            else itertools.repeat({})
 
         # Wrapping-up the generator
         item_generator = zip(
-            id_generator, all_dense.lat, all_dense.lon,
-            dense_info, tags
+            id_generator,
+            all_dense.lat,
+            all_dense.lon,
+            dense_info,
+            tags,
         )
 
-        for delta_id, delta_lat, delta_lon, info, tags in item_generator:
+        for delta_id, delta_lat, delta_lon, info, item_tags in item_generator:
             node_id += delta_id
             node_lat += delta_lat
             node_lon += delta_lon
@@ -317,7 +310,7 @@ class ParserPbf:
             item: Dict[str, Any] = {"type": "node"}
 
             item["id"] = node_id
-            item["tag"] = tags
+            item["tag"] = item_tags
             item.update(info)
 
             item["lat"] = (node_lat * self.granulity + self.offset_lat) / 10**9
@@ -325,9 +318,8 @@ class ParserPbf:
 
             yield item
 
-    def _parse_ways(self, all_ways: Iterable[Way]) -> Iterator[dict]:
-        """Parse all Way messages and yield all found ways.
-        """
+    def _parse_ways(self, all_ways: Iterable[Way]) -> Iterator[Dict[str, Any]]:
+        """Parse all Way messages and yield all found ways."""
         for way in all_ways:
             item: Dict[str, Any] = {"type": "way"}
 
@@ -342,13 +334,12 @@ class ParserPbf:
             current_node = 0
             for delta in way.refs:
                 current_node += delta
-                item["nd"].append(current_node)
+                item["nd"].append(current_node)  # type: ignore
 
             yield item
 
-    def _parse_rels(self, all_rels: Iterable[Relation]) -> Iterator[dict]:
-        """Parse all Relation messages and yield all found relations.
-        """
+    def _parse_rels(self, all_rels: Iterable[Relation]) -> Iterator[Dict[str, Any]]:
+        """Parse all Relation messages and yield all found relations."""
         for rel in all_rels:
             item: Dict[str, Any] = {"type": "relation"}
 
@@ -369,7 +360,7 @@ class ParserPbf:
 
                 role_name = self.string_table[role_sid].decode("utf8")
 
-                item["member"].append({
+                item["member"].append({  # type: ignore
                     "ref": member_id,
                     "type": member_type,
                     "role": role_name,
@@ -378,8 +369,7 @@ class ParserPbf:
             yield item
 
 
-def iter_from_pbf_buffer(buff: IO[bytes]) -> Iterator[dict]:
-    """Yields all items inside a given OSM PBF buffer.
-    """
+def iter_from_pbf_buffer(buff: IO[bytes]) -> Iterator[Dict[str, Any]]:
+    """Yields all items inside a given OSM PBF buffer."""
     parser = ParserPbf(buff)
     yield from parser.parse()

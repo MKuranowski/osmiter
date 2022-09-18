@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from typing import Any, Container, Dict, IO, Iterable, Iterator, List, Mapping, Optional
-from xml.sax.handler import ContentHandler as SAXContentHandler
-from xml.sax.expatreader import ExpatParser
+import xml.sax.xmlreader
+import xml.sax
 
 import iso8601
 
@@ -13,7 +13,7 @@ class OSMError(RuntimeError):
 def _osm_attributes(attributes: Mapping[str, str],
                     filter_attrs: Optional[Container[str]]) -> Dict[str, Any]:
     """Parses and converts OSM attributes"""
-    result = {}
+    result: Dict[str, Any] = {}
 
     for k, v in attributes.items():
         # check if attr filter was given and k should be parsed
@@ -46,7 +46,7 @@ def _osm_attributes(attributes: Mapping[str, str],
     return result
 
 
-class OSMContentHandler(SAXContentHandler):
+class OSMContentHandler(xml.sax.ContentHandler):
     """ContentHandler is a SAX Content Handler that collects encountered OSM elements"""
     def __init__(self, filter_attrs: Optional[Iterable[str]]) -> None:
         super().__init__()
@@ -66,7 +66,7 @@ class OSMContentHandler(SAXContentHandler):
             self.wayrel_attrs = None
             self.member_attrs = None
 
-    def startElement(self, name: str, attrs: Mapping[str, str]):
+    def startElement(self, name: str, attrs: Mapping[str, str]) -> None:
         """Handler when an XML element starts"""
         # New feature - reset `self.feature` & set attributes
         if name == "node":
@@ -94,7 +94,7 @@ class OSMContentHandler(SAXContentHandler):
             assert self.feature["type"] == "relation"
             self.feature["member"].append(_osm_attributes(attrs, self.member_attrs))
 
-    def endElement(self, name: str):
+    def endElement(self, name: str) -> None:
         """Handler when an XML element ends"""
         # We only care about closing of features
         if name not in {"node", "way", "relation"}:
@@ -122,7 +122,9 @@ def iter_from_xml_buffer(
     """
     # Create helper objects
     handler = OSMContentHandler(filter_attrs)
-    parser = ExpatParser()
+    parser = xml.sax.make_parser()
+    if not isinstance(parser, xml.sax.xmlreader.IncrementalParser):
+        raise RuntimeError("xml.sax.make_parser() returned a non-incremental parser")
     parser.setContentHandler(handler)
 
     # Read data in chunks
