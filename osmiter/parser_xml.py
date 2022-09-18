@@ -1,7 +1,8 @@
-from datetime import datetime, timezone
-from typing import Any, Container, Dict, IO, Iterable, Iterator, List, Mapping, Optional
-import xml.sax.xmlreader
 import xml.sax
+import xml.sax.xmlreader
+from datetime import datetime, timezone
+from typing import (IO, Any, Container, Dict, Iterable, Iterator, List,
+                    Mapping, Optional)
 
 import iso8601
 
